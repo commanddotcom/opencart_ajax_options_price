@@ -61,9 +61,9 @@ class ControllerExtensionModuleAjaxoptionprice extends Controller {
 			$options_hash = '';
 		}
 
-		$cache_key = 'ajax_options_'. md5($product_id . $options_hash .$this->session->data['currency'] . $this->session->data['language']);
+		$cache_id = 'ajax_options_'. md5($product_id . $options_hash .$this->session->data['currency'] . $this->session->data['language']);
 
-		if (!$this->use_cache || (!$json = $this->cache->get($cache_key))) {
+		if (!$this->use_cache || (!$json = $this->cache->get($cache_id))) {
 
 			$product_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_to_store p2s LEFT JOIN " . DB_PREFIX . "product p ON (p2s.product_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id) WHERE p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' AND p2s.product_id = '" . (int)$product_id . "' AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "' AND p.date_available <= NOW() AND p.status = '1'");
 
@@ -144,7 +144,7 @@ class ControllerExtensionModuleAjaxoptionprice extends Controller {
 		}
 
 		if ($update_cache && $this->use_cache) {
-			$this->cache->set($cache_key, $json);
+			$this->cache->set($cache_id, $json);
 		}
 
 		$this->response->addHeader('Content-Type: application/json');
@@ -161,7 +161,7 @@ class ControllerExtensionModuleAjaxoptionprice extends Controller {
 
 		$product_id = intval($this->request->get['pid']);
 
-		if ($product_id == 0) {
+		if (!$product_id) {
 			die('Invalid input params');
 		}
 
@@ -205,6 +205,11 @@ HTML;
 	}
 
 	public function edit_product_page(&$route = '', &$data = array(), &$output = '') {
+
+		if (!$this->config->get('module_ajaxoptionprice_status')) {
+			return null;
+		}
+
 		$product_id = intval($this->request->get['product_id'] ?? 0);
 
 		if ($product_id) {
@@ -222,7 +227,6 @@ HTML;
 				$output = str_replace('</body>', $js.'</body>', $output);
 			}
 		}
-
 	}
 
 }

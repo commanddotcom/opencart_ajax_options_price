@@ -98,6 +98,7 @@ class ControllerExtensionModuleAjaxoptionprice extends Controller {
 		# Add event like: 
 		$this->load->model('setting/event');
 		$this->model_setting_event->addEvent('ajaxoptionprice', 'catalog/view/product/product/after', 'extension/module/ajaxoptionprice/edit_product_page');
+		$this->model_setting_event->addEvent('ajaxoptionprice_hideFromDesignLayoutForm', 'admin/view/design/layout_form/before', 'extension/module/ajaxoptionprice/hideFromDesignLayoutForm');
 		
 		# Enable by default
 		$this->load->model('setting/setting');
@@ -109,7 +110,21 @@ class ControllerExtensionModuleAjaxoptionprice extends Controller {
 		# Remove event like: 
 		$this->load->model('setting/event');
 		$this->model_setting_event->deleteEventByCode('ajaxoptionprice');
+		$this->model_setting_event->deleteEventByCode('ajaxoptionprice_hideFromDesignLayoutForm');
 
+	}
+	
+	/**
+	 * Hide module from the list on Layouts page in admin panel
+	 * https://forum.opencart.com/viewtopic.php?p=799279#p799279
+	 */
+	public function hideFromDesignLayoutForm(&$route, &$data, &$template=null) {
+		foreach ($data['extensions'] as $key=>$extension) {
+			if ($extension['code'] == 'ajaxoptionprice') {
+				unset($data['extensions'][$key]);
+			}
+		}
+		return null;
 	}
 
 }
