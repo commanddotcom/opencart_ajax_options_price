@@ -65,7 +65,7 @@ class ControllerExtensionModuleAjaxoptionprice extends Controller {
 
 		if (!$this->use_cache || (!$json = $this->cache->get($cache_id))) {
 
-			$product_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_to_store p2s LEFT JOIN " . DB_PREFIX . "product p ON (p2s.product_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id) WHERE p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' AND p2s.product_id = '" . (int)$product_id . "' AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "' AND p.date_available <= NOW() AND p.status = '1'");
+			$product_query = $this->db->query("SELECT product_id, tax_class_id, price FROM " . DB_PREFIX . "product WHERE product_id='" . (int)$product_id . "' AND date_available <= NOW() AND status = '1'");
 
 			// Prepare data
 			if ($product_query->num_rows) {
