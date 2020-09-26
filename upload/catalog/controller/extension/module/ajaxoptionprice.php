@@ -38,7 +38,7 @@ class ControllerExtensionModuleAjaxoptionprice extends Controller {
 	public function index() { 
 
 		if (!$this->config->get('module_ajaxoptionprice_status')) {
-			die();
+			return true;
 		}
 
 		$json = array();
@@ -49,7 +49,7 @@ class ControllerExtensionModuleAjaxoptionprice extends Controller {
 		$options = $this->request->post['option'] ?? [];
 
 		if (!$product_id) {
-			die('Invalid input params');
+			return true;
 		}
 
 		$this->language->load('product/product');
@@ -138,7 +138,7 @@ class ControllerExtensionModuleAjaxoptionprice extends Controller {
 				$json['success'] = true;
 
 			} else {
-				die('Failed to get product');
+				die('ERROR: Failed to get product');
 			}
 
 		}
@@ -153,8 +153,6 @@ class ControllerExtensionModuleAjaxoptionprice extends Controller {
 
 	function js() {
 
-		header('Content-Type: application/javascript'); 
-
 		if (!$this->config->get('module_ajaxoptionprice_status')) {
 			die();
 		}
@@ -165,6 +163,7 @@ class ControllerExtensionModuleAjaxoptionprice extends Controller {
 			die('Invalid input params');
 		}
 
+		header('Content-Type: application/javascript');
 		$js = <<<HTML
 
 			var price_with_options_ajax_call = function() {

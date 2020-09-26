@@ -27,7 +27,7 @@ POSSIBILITY OF SUCH DAMAGE. */
 class ControllerExtensionModuleAjaxoptionprice extends Controller {
 
 	private $error = array();
-	private $version = '2.2';
+	private $version = '2.3';
 
 	public function index() {
 		$this->load->language('extension/module/ajaxoptionprice');
