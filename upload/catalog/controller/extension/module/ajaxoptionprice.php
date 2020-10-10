@@ -27,9 +27,10 @@ POSSIBILITY OF SUCH DAMAGE. */
 class ControllerExtensionModuleAjaxoptionprice extends Controller {
 
 	public $options_container 	= '#product';
-	public $special_price_container = 'special-price-tag';
 	public $price_container		= 'price-tag';
-	public $use_cache		= true;
+	public $special_price_container = 'special-price-tag';
+	public $tax_price_container	= 'tax-price-tag';
+	public $use_cache		= false;
 	public $fade_out_time		= 150;
 	public $fade_in_time		= 50;
 	
@@ -109,21 +110,23 @@ class ControllerExtensionModuleAjaxoptionprice extends Controller {
 					}
 				}
 
-				if ($product_price) {
-					$json['new_price']['price'] = $this->currency->format(
-						$this->tax->calculate(
-							($product_price + $options_price), 
-							$product_query->row['tax_class_id'], 
-							$this->config->get('config_tax')
-						), 
-						$this->config->get('config_currency')
-					);
-				} else {
-					$json['new_price']['price'] = false;
-				}
+				$json['new_price']['price'] = $this->currency->format(
+					$this->tax->calculate(
+						($product_price + $options_price), 
+						$product_query->row['tax_class_id'], 
+						$this->config->get('config_tax')
+					), 
+					$this->config->get('config_currency')
+				);
+					
+				$json['new_price']['tax'] = $this->currency->format(
+					$product_special_price ? $product_special_price : $json['new_price']['price'], 
+					$this->session->data['currency']
+				);
+
 
 				if ($product_special_price) {
-					$json['new_price']['special_price'] = $this->currency->format(
+					$json['new_price']['special'] = $this->currency->format(
 						$this->tax->calculate(
 							($product_special_price + $options_price), 
 							$product_query->row['tax_class_id'], 
@@ -132,7 +135,7 @@ class ControllerExtensionModuleAjaxoptionprice extends Controller {
 						$this->config->get('config_currency')
 					);
 				} else {
-					$json['new_price']['special_price'] = false;
+					$json['new_price']['special'] = false;
 				}
 
 				$json['success'] = true;
@@ -174,11 +177,14 @@ class ControllerExtensionModuleAjaxoptionprice extends Controller {
 					dataType: 'json',
 					success: function(json) {
 						if (json.success) {
-							if ($('{$this->special_price_container}').length > 0 && json.new_price.special_price) {
-								animation_on_change_price_with_options('{$this->special_price_container}', json.new_price.special_price);
-							}
 							if ($('{$this->price_container}').length > 0 && json.new_price.price) {
 								animation_on_change_price_with_options('{$this->price_container}', json.new_price.price);
+							}
+							if ($('{$this->special_price_container}').length > 0 && json.new_price.special) {
+								animation_on_change_price_with_options('{$this->special_price_container}', json.new_price.special);
+							}
+							if ($('{$this->special_price_container}').length > 0 && json.new_price.tax) {
+								animation_on_change_price_with_options('{$this->tax_price_container}', json.new_price.tax);
 							}
 						}
 					},
@@ -203,28 +209,29 @@ HTML;
 		exit;
 	}
 
-	public function edit_product_page(&$route = '', &$data = array(), &$output = '') {
-
+	
+	public function edit_product_page(&$route, &$args) {
+		
 		if (!$this->config->get('module_ajaxoptionprice_status')) {
 			return null;
 		}
-
+		
 		$product_id = intval($this->request->get['product_id'] ?? 0);
-
+		
 		if ($product_id) {
-			$product_info = $this->model_catalog_product->getProduct($product_id);
-			if ($product_info) {
-				$pattern = '/'.preg_quote($data['price']).'/';
-				$replacement = '<price-tag>'. addcslashes($data['price'], '\\$') .'</price-tag>';
-				$output = preg_replace($pattern, $replacement, $output, 1);
+			$js = '<script type="text/javascript" src="index.php?route=extension/module/ajaxoptionprice/js&pid='. $product_id .'"></script>';
+			$args['footer'] = $js.$args['footer'];
+		
+			$args['price'] = '<price-tag>'. $args['price'] .'</price-tag>';
 
-				$pattern = '/'.preg_quote($data['special']).'/';
-				$replacement = '<special-price-tag>'. addcslashes($data['special'], '\\$') .'</special-price-tag>';
-				$output = preg_replace($pattern, $replacement, $output, 1);
-
-				$js = '<script type="text/javascript" src="index.php?route=extension/module/ajaxoptionprice/js&pid='. $product_id .'"></script>';
-				$output = str_replace('</body>', $js.'</body>', $output);
+			if ($args['special']) {
+				$args['special'] = '<special-price-tag>'. $args['special'] .'</special-price-tag>';
 			}
+
+			if ($args['tax']) {
+				$args['tax'] = '<tax-price-tag>'. $args['tax'] .'</tax-price-tag>';
+			}
+
 		}
 	}
 

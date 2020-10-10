@@ -27,7 +27,7 @@ POSSIBILITY OF SUCH DAMAGE. */
 class ControllerExtensionModuleAjaxoptionprice extends Controller {
 
 	private $error = array();
-	private $version = '2.3';
+	private $version = '2.4';
 
 	public function index() {
 		$this->load->language('extension/module/ajaxoptionprice');
@@ -97,7 +97,7 @@ class ControllerExtensionModuleAjaxoptionprice extends Controller {
 
 		# Add event like: 
 		$this->load->model('setting/event');
-		$this->model_setting_event->addEvent('ajaxoptionprice', 'catalog/view/product/product/after', 'extension/module/ajaxoptionprice/edit_product_page');
+		$this->model_setting_event->addEvent('ajaxoptionprice', 'catalog/view/product/product/before', 'extension/module/ajaxoptionprice/edit_product_page');
 		$this->model_setting_event->addEvent('ajaxoptionprice_hideFromDesignLayoutForm', 'admin/view/design/layout_form/before', 'extension/module/ajaxoptionprice/hideFromDesignLayoutForm');
 		
 		# Enable by default
